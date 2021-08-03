@@ -36,5 +36,5 @@ func main() {
 		return
 	}
 
-	fmt.Println("commands %v success use %s\n", os.Args, time.Now().Sub(start))
+	fmt.Printf("commands: %v \r\nsuccess use %s\n", os.Args[1], time.Now().Sub(start))
 }
