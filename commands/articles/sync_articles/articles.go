@@ -5,7 +5,7 @@ func SyncArticlesToEs() {
 }
 
 func GetArticlesFromMysql() {
-
+	
 }
 
 func GetEsArticleFormat() {

@@ -1,2 +1,10 @@
 [es]
    [es.hosts] = ["http://es64.sonder.fun"]
+
+[mysql]
+    [mysql.articles]
+        host = "115.159.110.53"
+        port = "3306"
+        user = "biaoge"
+        passwd = "biaogev587"
+        db = "db"

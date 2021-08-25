@@ -1,7 +1,6 @@
 package sync_articles
 
 import (
-	"fmt"
 	"github.com/milkb32/go-command/cmds"
 	"github.com/urfave/cli"
 )
@@ -20,7 +19,7 @@ func Init() {
 
 // Run run a cmd
 func Run() error {
-	fmt.Println("这是第一个command")
+
 
 	return nil
 }
