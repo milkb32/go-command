@@ -1,5 +1,7 @@
 [es]
-   [es.hosts] = ["http://es64.sonder.fun"]
+    [es.articles]
+        host = "http://es64.sonder.fun"
+        index = "articles"
 
 [mysql]
     [mysql.articles]

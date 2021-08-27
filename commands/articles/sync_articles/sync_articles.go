@@ -1,7 +1,10 @@
 package sync_articles
 
 import (
+	"errors"
+	"fmt"
 	"github.com/milkb32/go-command/cmds"
+	"github.com/milkb32/go-command/commands/articles/articles_to_es"
 	"github.com/urfave/cli"
 )
 
@@ -19,7 +22,12 @@ func Init() {
 
 // Run run a cmd
 func Run() error {
+	maxId, err := articles_to_es.GetMaxIdFromEs()
+	if err != nil {
+		return errors.New("GetMaxIdFromEs error")
+	}
 
+	fmt.Println(maxId)
 
 	return nil
 }
