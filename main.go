@@ -32,7 +32,7 @@ func main() {
 
 	err = app.Run(os.Args)
 	if err != nil {
-		fmt.Println("配置文件初始化出错:", err)
+		fmt.Println("程序执行出错:", err)
 		return
 	}
 

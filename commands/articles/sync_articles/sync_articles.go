@@ -1,10 +1,10 @@
 package sync_articles
 
 import (
-	"errors"
 	"fmt"
 	"github.com/milkb32/go-command/cmds"
-	"github.com/milkb32/go-command/commands/articles/articles_to_es"
+	"github.com/milkb32/go-command/commands/articles/articles_mysql"
+	"github.com/milkb32/go-command/commands/articles/articles_es"
 	"github.com/urfave/cli"
 )
 
@@ -22,12 +22,22 @@ func Init() {
 
 // Run run a cmd
 func Run() error {
-	maxId, err := articles_to_es.GetMaxIdFromEs()
+	fmt.Println("start....")
+	// 获取es中最小的文章id
+	maxId, err := articles_es.GetMaxIdFromEs()
 	if err != nil {
-		return errors.New("GetMaxIdFromEs error")
+		return err
 	}
 
-	fmt.Println(maxId)
+	// 从mysql一次获取100篇文章
+	articles, err := articles_mysql.GetArticlesFromMysqlById(maxId, 100)
+	if err != nil {
+		return err
+	}
+	fmt.Println(articles)
+	// 将文章写入es
+	articles_es.SaveToEs(articles)
+
 
 	return nil
 }

@@ -29,20 +29,20 @@ type EsHandle struct {
 func NewArticleEsHandle() (*EsHandle, error) {
 	esHandle := &EsHandle{
 		Client:         nil,
-		ESUrl:          viper.GetString("es.articles.hosts"),
+		ESUrl:          viper.GetString("es.articles.host"),
 		ESIndex:        viper.GetString("es.articles.index"),
-		ESType:         "",
+		ESType:         "_doc",
 		Body:           make(map[string]interface{}),
 		Id:             "",
 		OperateType:    "",
 		FieldUpdateKey: "",
-		ctx:            *new(context.Context),
+		ctx:            context.Background(),
 	}
 
 	// 初始化Client
 	err := esHandle.NewClient()
 	if err != nil {
-		return esHandle, errors.New("初始化es client失败")
+		return esHandle, err
 	}
 
 	return esHandle, nil
@@ -50,13 +50,15 @@ func NewArticleEsHandle() (*EsHandle, error) {
 
 func (es *EsHandle) NewClient() error {
 	if es.ESUrl == "" || es.ESIndex == "" {
-		return errors.New("es连接为空")
+		return errors.New("es连接信息为空")
 	}
 
 	client, err := elastic.NewClient(
-		elastic.SetURL(es.ESUrl))
+		elastic.SetURL(es.ESUrl),
+		elastic.SetSniff(false),
+	)
 	if err != nil {
-		return errors.New("es连接初始化出错")
+		return err
 	}
 
 	es.Client = client
@@ -64,19 +66,19 @@ func (es *EsHandle) NewClient() error {
 }
 
 // Insert
-func (es *EsHandle) Insert() error {
-	bodyJson, err := json.Marshal(es.Body)
+func (es *EsHandle) Insert(data map[string]interface{}) error {
+	bodyJson, err := json.Marshal(data)
 	if err != nil {
 		return errors.New("")
 	}
-	_, err = es.Client.Index().Index(es.ESIndex).Type(es.ESType).Id(es.Id).
-		BodyJson(bodyJson).Refresh("true").Do(es.ctx)
+	_, err = es.Client.Index().Index(es.ESIndex).Type("_doc").Id(es.Id).
+		BodyJson(string(bodyJson)).Do(es.ctx)
 
 	return err
 }
 
 // Query
-func (es *EsHandle) Query(boolQuery *elastic.BoolQuery, size int, sortBy string, ascending bool) (*elastic.SearchResult, error) {
+func (es *EsHandle) Query(boolQuery *elastic.BoolQuery, source []string, size int, sortBy string, ascending bool) (*elastic.SearchResult, error) {
 	searchService := es.Client.Search(es.ESIndex).Query(boolQuery)
 	if sortBy != "" {
 		searchService.Sort(sortBy, ascending)
@@ -85,9 +87,10 @@ func (es *EsHandle) Query(boolQuery *elastic.BoolQuery, size int, sortBy string,
 	if size > 0 {
 		searchService.Size(size)
 	}
-	searchResult, err := searchService.Pretty(true).Do(es.ctx)
+	searchFieldsContext := elastic.NewFetchSourceContext(true).Include(source...)
+	searchResult, err := searchService.FetchSourceContext(searchFieldsContext).Do(es.ctx)
 	if err != nil {
-		return nil, errors.New("query出错")
+		return nil, err
 	}
 
 	return searchResult, nil
