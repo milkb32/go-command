@@ -34,10 +34,9 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(articles)
+	fmt.Println("同步文章数量：", len(articles))
 	// 将文章写入es
 	articles_es.SaveToEs(articles)
-
 
 	return nil
 }
